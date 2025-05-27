@@ -102,9 +102,10 @@ public class CandidatoServiceImpl implements CandidatoService {
 
     private CandidatoDTO toDTO(Candidato candidato) {
         CandidatoDTO dto = new CandidatoDTO();
-        dto.setId(candidato.getId());
-        dto.setIdPersona(candidato.getPersona() != null ? candidato.getPersona().getId() : null);
-        dto.setIdPartido(candidato.getPartido() != null ? candidato.getPartido().getId() : null);
+        dto.setIdCandidato(candidato.getId());
+        dto.setIdPersona(candidato.getId());
+        dto.setIdPersona(candidato.getPersona() != null ? candidato.getPersona().getIdPersona() : null);
+        dto.setIdPartido(candidato.getPartido() != null ? candidato.getPartido().getIdPartido() : null);
         dto.setIdEleccion(candidato.getEleccion() != null ? candidato.getEleccion().getId() : null);
         dto.setCargoPostulado(candidato.getCargoPostulado());
         dto.setNumeroLista(candidato.getNumeroLista());

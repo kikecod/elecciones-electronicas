@@ -22,7 +22,7 @@ public class Facultad {
     private LocalDate fechaCreacion;
 
     @ManyToOne
-    @JoinColumn(name = "decano", referencedColumnName = "id_docente")
+    @JoinColumn(name = "decano", referencedColumnName = "id_persona", nullable = false)
     private Docente decano;
 
     @Column(nullable = false)

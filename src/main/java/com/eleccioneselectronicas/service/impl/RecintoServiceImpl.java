@@ -1,4 +1,4 @@
-package com.eleccioneselectronicas.serviceImpl;
+package com.eleccioneselectronicas.service.impl;
 
 import com.eleccioneselectronicas.dto.RecintoDTO;
 import com.eleccioneselectronicas.model.Recinto;

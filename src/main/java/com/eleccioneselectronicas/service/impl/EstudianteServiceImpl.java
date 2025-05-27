@@ -18,7 +18,7 @@ public class EstudianteServiceImpl implements EstudianteService {
 
     private EstudianteDTO toDTO(Estudiante e) {
         return EstudianteDTO.builder()
-                .id(e.getId())
+                .id(e.getIdPersona())
                 .ci(e.getCi())
                 .nombre(e.getNombre())
                 .apellido_paterno(e.getApellido_paterno())
@@ -38,7 +38,7 @@ public class EstudianteServiceImpl implements EstudianteService {
 
     private Estudiante toEntity(EstudianteDTO dto) {
         return Estudiante.builder()
-                .id(dto.getId())
+                .idPersona(dto.getId())
                 .ci(dto.getCi())
                 .nombre(dto.getNombre())
                 .apellido_paterno(dto.getApellido_paterno())

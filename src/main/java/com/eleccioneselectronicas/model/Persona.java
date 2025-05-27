@@ -23,7 +23,7 @@ public abstract class Persona {
     @Id
     @Column(name = "id_persona")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idPersona;
 
     @Column(nullable = false, unique = true)
     @Basic(optional = false)

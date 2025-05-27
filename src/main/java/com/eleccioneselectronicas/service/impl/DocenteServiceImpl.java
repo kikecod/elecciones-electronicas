@@ -18,7 +18,7 @@ public class DocenteServiceImpl implements DocenteService{
 
     private DocenteDTO toDTO(Docente d) {
         return DocenteDTO.builder()
-                .id(d.getId())
+                .id(d.getIdPersona())
                 .ci(d.getCi())
                 .nombre(d.getNombre())
                 .apellido_paterno(d.getApellido_paterno())
@@ -38,7 +38,7 @@ public class DocenteServiceImpl implements DocenteService{
 
     private Docente toEntity(DocenteDTO dto) {
         return Docente.builder()
-                .id(dto.getId())
+                .idPersona(dto.getId())
                 .ci(dto.getCi())
                 .nombre(dto.getNombre())
                 .apellido_paterno(dto.getApellido_paterno())
