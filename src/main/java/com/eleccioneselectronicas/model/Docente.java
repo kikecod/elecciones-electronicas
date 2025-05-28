@@ -20,14 +20,14 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "docente")
 public class Docente extends Persona {
     
-    @Column(name = "categoria_docente", nullable = false, length = 20)
+    @Column(name = "categoria_docente", nullable = false, length = 100)
     @Basic(optional = false)
-    @Length(min = 3, max = 20)
+    @Length(min = 3, max = 100)
     private String categoriaDocente;
 
-    @Column(name = "grado_academico", nullable = false, length = 20)
+    @Column(name = "grado_academico", nullable = false, length = 100)
     @Basic(optional = false)
-    @Length(min = 3, max = 20)
+    @Length(min = 3, max = 100)
     private String gradoAcademico;
 
     @Column(name = "fecha_ingreso", nullable = false)

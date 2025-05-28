@@ -30,17 +30,17 @@ public abstract class Persona {
     private String ci;
 
 
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false, length = 50)
     @Basic(optional = false)
-    @Length(min = 3, max = 15)
+    @Length(min = 3, max = 50)
     private String nombre;
 
-    @Column(nullable = false, length = 15)
-    @Length(min = 3, max = 15)
+    @Column(nullable = false, length = 50)
+    @Length(min = 3, max = 50)
     @Basic(optional = false)
     private String apellido_paterno;
 
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false, length = 50)
     @Length(min = 3, max = 15)
     @Basic(optional = false)
     private String apellido_materno;
@@ -58,9 +58,9 @@ public abstract class Persona {
     @Basic(optional = false)
     private String telefono;
 
-    @Column(nullable = false, length = 35)
+    @Column(nullable = false, length = 100)
     @Basic(optional = false)
-    @Length(min = 3, max = 35)
+    @Length(min = 3, max = 105)
     private String direccion;
 
     @Column(nullable = true, length = 10)

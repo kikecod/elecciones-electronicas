@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface CandidatoRepository extends JpaRepository<Candidato, Long> {
     List<Candidato> findByCargoPostuladoContainingIgnoreCase(String cargoPostulado);
+    List<Candidato> findByEleccion_Id(Long idEleccion);
 }
