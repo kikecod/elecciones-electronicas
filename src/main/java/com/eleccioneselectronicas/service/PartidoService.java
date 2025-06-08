@@ -9,4 +9,5 @@ public interface PartidoService {
     List<Partido> listarPartidos();
     Partido actualizarPartido(Long id, PartidoDTO dto);
     void eliminarPartido(Long id);
+    Partido actualizarLogo(Long id, String string);
 }

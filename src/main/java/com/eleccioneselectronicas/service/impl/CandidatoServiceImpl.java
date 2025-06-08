@@ -87,6 +87,17 @@ public class CandidatoServiceImpl implements CandidatoService {
     }
 
     @Override
+    public CandidatoDTO actualizarPropuesta(Long id, String planPropuesta) {
+        Optional<Candidato> candidatoOpt = candidatoRepository.findById(id);
+        if (candidatoOpt.isEmpty())
+            return null;
+
+        Candidato candidato = candidatoOpt.get();
+        candidato.setPlanPropuesta(planPropuesta);
+        return toDTO(candidatoRepository.save(candidato));
+    }
+
+    @Override
     public void eliminar(Long id) {
         candidatoRepository.deleteById(id);
     }
