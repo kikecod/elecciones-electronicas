@@ -10,4 +10,7 @@ public interface VotanteService {
     VotanteDTO crear(VotanteDTO dto);
     VotanteDTO actualizar(Long id, VotanteDTO dto);
     void eliminar(Long id);
+
+    VotanteDTO registrarConImagen(VotanteDTO dto);
+    VotanteDTO buscarPorCI(String ci);
 }
