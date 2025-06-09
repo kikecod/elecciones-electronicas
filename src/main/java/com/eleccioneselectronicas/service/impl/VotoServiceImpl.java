@@ -1,6 +1,6 @@
 package com.eleccioneselectronicas.service.impl;
 
-import com.eleccioneselectronicas.dto.VotoDTO;
+import com.eleccioneselectronicas.dto.*;
 import com.eleccioneselectronicas.model.Votante;
 import com.eleccioneselectronicas.model.Voto;
 import com.eleccioneselectronicas.repository.*;
@@ -31,7 +31,9 @@ public class VotoServiceImpl implements VotoService {
             throw new IllegalArgumentException("Este votante ya emitió su voto en esta elección.");
         }
 
-        Votante votante = votanteRepo.findById(dto.getIdVotante()).orElseThrow();
+        Votante votante = votanteRepo.findById(dto.getIdVotante())
+                .orElseThrow(() -> new EntityNotFoundException("Votante no encontrado"));
+
         if (!Boolean.TRUE.equals(votante.getHabilitado())) {
             throw new IllegalStateException("Votante no habilitado para votar.");
         }
@@ -44,10 +46,10 @@ public class VotoServiceImpl implements VotoService {
         voto.setDispositivo(dispositivoRepo.findById(dto.getIdDispositivo()).orElseThrow());
         voto.setEmitidoTs(LocalDateTime.now());
 
-        voto.setHashPrev(dto.getHashPrev()); // se puede encadenar si usas blockchain
+        voto.setHashPrev(dto.getHashPrev());
         voto.setHashActual(generateHash(voto));
         voto.setFolioRecibo(UUID.randomUUID().toString());
-        voto.setValido(true); // lógica adicional puede modificar esto
+        voto.setValido(true);
 
         return toDto(votoRepo.save(voto));
     }
@@ -61,6 +63,37 @@ public class VotoServiceImpl implements VotoService {
     public VotoDTO obtenerPorId(Long id) {
         return votoRepo.findById(id).map(this::toDto)
                 .orElseThrow(() -> new EntityNotFoundException("Voto no encontrado"));
+    }
+
+    @Override
+    public UbicacionVotacionDTO obtenerUbicacionPorCI(String ci) {
+        Votante votante = votanteRepo.findByPersona_Ci(ci)
+                .orElseThrow(() -> new IllegalArgumentException("Votante no encontrado"));
+
+        Voto voto = votoRepo.findTopByVotante_IdVotanteOrderByEmitidoTsDesc(votante.getIdVotante())
+                .orElseThrow(() -> new IllegalArgumentException("No hay registro de voto para este votante"));
+
+        return new UbicacionVotacionDTO(
+                voto.getRecinto().getNombre(),
+                voto.getDispositivo().getSerie()
+        );
+    }
+
+    @Override
+    public ValidacionUbicacionResponseDTO validarUbicacion(String ci, Long idRecinto, ValidacionUbicacionRequestDTO dto) {
+        Votante votante = votanteRepo.findByPersona_Ci(ci)
+                .orElseThrow(() -> new IllegalArgumentException("Votante no encontrado"));
+
+        Voto voto = votoRepo.findTopByVotante_IdVotanteOrderByEmitidoTsDesc(votante.getIdVotante())
+                .orElseThrow(() -> new IllegalArgumentException("No hay registro de voto para este votante"));
+
+        boolean valido = voto.getRecinto().getIdRecinto().equals(idRecinto)
+                && voto.getDispositivo().getIdDispositivo().equals(dto.getIdDispositivo());
+
+        return new ValidacionUbicacionResponseDTO(
+                valido,
+                valido ? "Ubicación correcta para emitir voto." : "Ubicación incorrecta."
+        );
     }
 
     private VotoDTO toDto(Voto v) {
@@ -81,6 +114,6 @@ public class VotoServiceImpl implements VotoService {
 
     private String generateHash(Voto voto) {
         String base = voto.getVotante() + "|" + voto.getEleccion() + "|" + voto.getPartido() + "|" + LocalDateTime.now();
-        return Base64.getEncoder().encodeToString(base.getBytes()); // simplificado
+        return Base64.getEncoder().encodeToString(base.getBytes());
     }
 }
