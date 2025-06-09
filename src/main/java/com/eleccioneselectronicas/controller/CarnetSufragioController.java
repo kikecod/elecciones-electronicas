@@ -2,12 +2,10 @@ package com.eleccioneselectronicas.controller;
 
 import com.eleccioneselectronicas.service.CarnetSufragioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/carnet-sufragio")
@@ -22,5 +20,14 @@ public class CarnetSufragioController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
+    }
+    @PostMapping("/{idVotante}/enviar-email")
+    public ResponseEntity<String> enviarCarnetPorEmail(@PathVariable Long idVotante) {
+        try {
+            carnetSufragioService.enviarCarnetPorEmail(idVotante);
+            return ResponseEntity.ok("Correo enviado correctamente.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
     }
 }

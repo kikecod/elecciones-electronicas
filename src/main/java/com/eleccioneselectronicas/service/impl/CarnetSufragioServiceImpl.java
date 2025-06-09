@@ -21,8 +21,14 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.property.TextAlignment;
+import jakarta.mail.util.ByteArrayDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import jakarta.mail.internet.MimeMessage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,6 +46,10 @@ public class CarnetSufragioServiceImpl implements CarnetSufragioService {
     private RecintoRepository recintoRepository;
     @Autowired
     private DispositivoRepository dispositivoRepository;
+
+    @Autowired
+    private JavaMailSender mailSender;
+
 
     @Override
     public byte[] generarPdfCarnet(Long idVotante) {
@@ -77,38 +87,61 @@ public class CarnetSufragioServiceImpl implements CarnetSufragioService {
 
             // Establecer fuentes
             PdfFont font = PdfFontFactory.createFont(FontConstants.HELVETICA);
+            PdfFont boldFont = PdfFontFactory.createFont(FontConstants.HELVETICA_BOLD);
 
-            // Título
+            // Título del Certificado
             document.add(new Paragraph("CERTIFICADO DE SUFRAGIO")
-                    .setFont(font)
-                    .setFontSize(16)
-                    .setBold()
-                    .setTextAlignment(TextAlignment.CENTER));
+                    .setFont(boldFont)
+                    .setFontSize(18)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(10));
 
-            // Imagen del logo (opcional, se puede reemplazar por el logo real)
-            Image logo = new Image(ImageDataFactory.create(getClass().getClassLoader().getResource("static/logo.png").getPath())); // Cambia la ruta del logo
-            logo.setWidth(100);
-            logo.setHeight(50);
-            document.add(logo);
+            // Imagen del logo (a la izquierda)
+            ClassPathResource logoResource = new ClassPathResource("static/logo.png");
+            if (logoResource.exists()) {
+                Image logo = new Image(ImageDataFactory.create(logoResource.getFile().getPath()));
+                logo.setWidth(20);  // Ajustar el tamaño del logo
+                logo.setHeight(40);
+                document.add(logo);
+            }
 
-            // Foto del votante (sustituir con la ruta de la foto real)
-            Image photo = new Image(ImageDataFactory.create(dto.getFoto()));
-            photo.setWidth(50);
-            photo.setHeight(50);
-            document.add(photo);
+            // Foto del votante (a la derecha del logo)
+            String fotoPath = dto.getFoto();  // Ruta obtenida desde hashRostro
+            if (fotoPath != null && !fotoPath.isEmpty()) {
+                FileSystemResource fileResource = new FileSystemResource(fotoPath);
+                if (fileResource.exists()) {
+                    Image photo = new Image(ImageDataFactory.create(fileResource.getFile().getPath()));
+                    photo.setWidth(100);
+                    photo.setHeight(100);
+                    photo.setFixedPosition(450, 550);  // Ubicamos la foto a la derecha en el diseño
+                    document.add(photo);
+                }
+            }
 
             // Información del votante
-            document.add(new Paragraph("Nombres: " + dto.getNombres() + " " + dto.getApellidos()));
-            document.add(new Paragraph("Fecha Nac.: " + dto.getFechaNacimiento()));
-            document.add(new Paragraph("Recinto: " + dto.getRecinto()));
-            document.add(new Paragraph("N° Mesa: " + dto.getDispositivo()));
-            document.add(new Paragraph("CI: " + dto.getCi()));
+            document.add(new Paragraph("Nombres: " + dto.getNombres() + " " + dto.getApellidos())
+                    .setFont(font)
+                    .setFontSize(12));
+            document.add(new Paragraph("Fecha Nac.: " + dto.getFechaNacimiento())
+                    .setFont(font)
+                    .setFontSize(12));
+            document.add(new Paragraph("Recinto: " + dto.getRecinto())
+                    .setFont(font)
+                    .setFontSize(12));
+            document.add(new Paragraph("N° Mesa: " + dto.getDispositivo())
+                    .setFont(font)
+                    .setFontSize(12));
+            document.add(new Paragraph("CI: " + dto.getCi())
+                    .setFont(font)
+                    .setFontSize(12)
+                    .setMarginBottom(15));
 
             // QR
             BarcodeQRCode qrCode = new BarcodeQRCode(dto.getQrUuid());
             Image qrCodeImage = new Image(qrCode.createFormXObject(ColorConstants.BLACK, pdfDoc));
-            qrCodeImage.setWidth(80);
-            qrCodeImage.setHeight(80);
+            qrCodeImage.setWidth(100);
+            qrCodeImage.setHeight(100);
+            qrCodeImage.setFixedPosition(450, 250);  // Ubicamos el QR en la parte inferior derecha
             document.add(qrCodeImage);
 
             // Cerrar el documento
@@ -118,6 +151,32 @@ public class CarnetSufragioServiceImpl implements CarnetSufragioService {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+    @Override
+    public void enviarCarnetPorEmail(Long idVotante) {
+        Votante votante = votanteRepository.findById(idVotante)
+                .orElseThrow(() -> new RuntimeException("Votante no encontrado"));
+
+        Persona persona = personaRepository.findById(votante.getPersona().getIdPersona())
+                .orElseThrow(() -> new RuntimeException("Persona no encontrada"));
+
+        byte[] pdfBytes = generarPdfCarnet(idVotante);
+        if (pdfBytes == null) throw new RuntimeException("No se pudo generar el carnet PDF");
+
+        try {
+            MimeMessage mensaje = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mensaje, true);
+
+            helper.setTo(persona.getEmail());
+            helper.setSubject("Tu Carnet de Sufragio");
+            helper.setText("Estimado/a " + persona.getNombre() + ",\n\nAdjunto encontrarás tu carnet de sufragio en formato PDF.\n\nAtentamente,\nTribunal Electoral");
+
+            helper.addAttachment("CarnetSufragio.pdf", new ByteArrayDataSource(pdfBytes, "application/pdf"));
+
+            mailSender.send(mensaje);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al enviar correo: " + e.getMessage());
         }
     }
 }
