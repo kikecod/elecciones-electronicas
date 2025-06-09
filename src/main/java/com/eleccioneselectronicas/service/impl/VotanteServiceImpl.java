@@ -12,7 +12,10 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.*;
+import java.nio.file.*;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,6 +34,9 @@ public class VotanteServiceImpl implements VotanteService {
     @Autowired
     private RecintoRepository recintoRepo;
 
+    private static final String IMAGES_DIRECTORY = "src/main/resources/votantes/";
+
+
     @Override
     public List<VotanteDTO> obtenerTodos() {
         return repository.findAll().stream().map(this::toDto).toList();
@@ -41,33 +47,67 @@ public class VotanteServiceImpl implements VotanteService {
         return repository.findById(id).map(this::toDto)
                 .orElseThrow(() -> new EntityNotFoundException("Votante no encontrado"));
     }
+    @Override
+    public VotanteDTO crear(VotanteDTO dto) {
+        Votante votante = new Votante();
+
+        votante.setPersona(personaRepo.findById(dto.getIdPersona())
+                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada")));
+
+        votante.setEleccion(eleccionRepo.findById(dto.getIdEleccion())
+                .orElseThrow(() -> new EntityNotFoundException("Elección no encontrada")));
+
+        votante.setRecinto(recintoRepo.findById(dto.getIdRecinto())
+                .orElseThrow(() -> new EntityNotFoundException("Recinto no encontrado")));
+
+        votante.setQrUuid(UUID.randomUUID().toString());
+
+        // Guardar la imagen en la carpeta y obtener la ruta
+        String imagePath = saveImage(dto.getHashRostro());
+        votante.setHashRostro(imagePath);  // Almacenar la ruta de la imagen
+
+        votante.setHashHuella(null);  // Desactivado
+        votante.setHashFirma(null);   // Desactivado
+
+        votante.setHabilitado(true);
+        votante.setFechaHabilitacion(LocalDateTime.now());
+
+        Votante guardado = repository.save(votante);
+        return toDto(guardado);
+    }
 
     @Override
-public VotanteDTO crear(VotanteDTO dto) {
-    Votante votante = new Votante();
+    public VotanteDTO registrarConImagen(VotanteDTO dto) {
+        Votante votante = new Votante();
 
-    votante.setPersona(personaRepo.findById(dto.getIdPersona())
-            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada")));
+        votante.setPersona(personaRepo.findById(dto.getIdPersona())
+                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada")));
 
-    votante.setEleccion(eleccionRepo.findById(dto.getIdEleccion())
-            .orElseThrow(() -> new EntityNotFoundException("Elección no encontrada")));
+        votante.setEleccion(eleccionRepo.findById(dto.getIdEleccion())
+                .orElseThrow(() -> new EntityNotFoundException("Elección no encontrada")));
 
-    votante.setRecinto(recintoRepo.findById(dto.getIdRecinto())
-            .orElseThrow(() -> new EntityNotFoundException("Recinto no encontrado")));
+        votante.setRecinto(recintoRepo.findById(dto.getIdRecinto())
+                .orElseThrow(() -> new EntityNotFoundException("Recinto no encontrado")));
 
-    votante.setQrUuid(UUID.randomUUID().toString()); // GENERADO AUTOMÁTICAMENTE
-    votante.setHashRostro(dto.getHashRostro());      // Imagen base64
+        votante.setQrUuid(UUID.randomUUID().toString());
 
-    votante.setHashHuella(null);                     // Desactivado
-    votante.setHashFirma(null);                      // Desactivado
+        // Guardar la imagen en la carpeta y obtener la ruta
+        String imagePath = saveImage(dto.getHashRostro());
+        votante.setHashRostro(imagePath);  // Almacenar la ruta de la imagen
 
-    votante.setHabilitado(true);
-    votante.setFechaHabilitacion(LocalDateTime.now());
+        votante.setHashHuella(null);  // Desactivado
+        votante.setHashFirma(null);   // Desactivado
 
-    Votante guardado = repository.save(votante);
-    return toDto(guardado);
-}
+        votante.setHabilitado(true);
+        votante.setFechaHabilitacion(LocalDateTime.now());
 
+        Votante guardado = repository.save(votante);
+        return toDto(guardado);
+    }
+    @Override
+    public void eliminar(Long id) {
+        repository.deleteById(id);
+    }
     @Override
     public VotanteDTO actualizar(Long id, VotanteDTO dto) {
         Votante votante = repository.findById(id).orElseThrow();
@@ -80,29 +120,36 @@ public VotanteDTO crear(VotanteDTO dto) {
         return toDto(repository.save(votante));
     }
 
-    @Override
-    public void eliminar(Long id) {
-        repository.deleteById(id);
+    // Función para guardar la imagen en una carpeta y devolver la ruta
+    private String saveImage(String base64Image) {
+        if (base64Image == null || base64Image.isEmpty()) {
+            throw new IllegalArgumentException("Imagen base64 no puede ser nula o vacía");
+        }
+
+        // Obtener los bytes de la imagen desde la cadena base64
+        byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+
+        // Generar un nombre único para la imagen
+        String imageName = UUID.randomUUID().toString() + ".jpg";
+        Path imagePath = Paths.get(IMAGES_DIRECTORY, imageName);
+
+        // Crear la carpeta si no existe
+        try {
+            Files.createDirectories(Paths.get(IMAGES_DIRECTORY));
+        } catch (IOException e) {
+            throw new RuntimeException("No se pudo crear la carpeta de imágenes", e);
+        }
+
+        // Guardar la imagen como un archivo en el servidor
+        try (FileOutputStream fos = new FileOutputStream(imagePath.toFile())) {
+            fos.write(imageBytes);
+        } catch (IOException e) {
+            throw new RuntimeException("Error al guardar la imagen", e);
+        }
+
+        // Devolver la ruta de la imagen guardada
+        return imagePath.toString();
     }
-
-    @Override
-    public VotanteDTO registrarConImagen(VotanteDTO dto) {
-        Votante votante = new Votante();
-        votante.setPersona(personaRepo.findById(dto.getIdPersona()).orElseThrow());
-        votante.setEleccion(eleccionRepo.findById(dto.getIdEleccion()).orElseThrow());
-        votante.setRecinto(recintoRepo.findById(dto.getIdRecinto()).orElseThrow());
-        votante.setQrUuid(UUID.randomUUID().toString());
-        votante.setHashRostro(dto.getHashRostro());
-        votante.setHabilitado(true);
-        votante.setFechaHabilitacion(LocalDateTime.now());
-
-        votante.setHashFirma(null); // Desactivados
-        votante.setHashHuella(null);
-
-        Votante guardado = repository.save(votante);
-        return toDto(guardado);
-    }
-
     @Override
     public VotanteDTO buscarPorCI(String ci) {
         Persona persona = personaRepo.findByCi(ci)
@@ -123,7 +170,7 @@ public VotanteDTO crear(VotanteDTO dto) {
         dto.setQrUuid(v.getQrUuid());
         dto.setHashHuella(v.getHashHuella());
         dto.setHashFirma(v.getHashFirma());
-        dto.setHashRostro(v.getHashRostro());
+        dto.setHashRostro(v.getHashRostro());  // Aquí devolveremos la ruta
         dto.setHabilitado(v.getHabilitado());
         dto.setFechaHabilitacion(v.getFechaHabilitacion());
         return dto;
