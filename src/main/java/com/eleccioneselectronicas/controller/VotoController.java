@@ -1,6 +1,6 @@
 package com.eleccioneselectronicas.controller;
 
-import com.eleccioneselectronicas.dto.VotoDTO;
+import com.eleccioneselectronicas.dto.*;
 import com.eleccioneselectronicas.service.VotoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,5 +32,18 @@ public class VotoController {
     @GetMapping("/{id}")
     public ResponseEntity<VotoDTO> obtener(@PathVariable Long id) {
         return ResponseEntity.ok(service.obtenerPorId(id));
+    }
+
+    @GetMapping("/recinto/votante/ci/{ci}")
+    public ResponseEntity<UbicacionVotacionDTO> obtenerUbicacion(@PathVariable String ci) {
+        return ResponseEntity.ok(service.obtenerUbicacionPorCI(ci));
+    }
+
+    @PostMapping("/voto/buscar/{ci}/recinto/{idRecinto}")
+    public ResponseEntity<ValidacionUbicacionResponseDTO> validarUbicacion(
+            @PathVariable String ci,
+            @PathVariable Long idRecinto,
+            @RequestBody ValidacionUbicacionRequestDTO dto) {
+        return ResponseEntity.ok(service.validarUbicacion(ci, idRecinto, dto));
     }
 }

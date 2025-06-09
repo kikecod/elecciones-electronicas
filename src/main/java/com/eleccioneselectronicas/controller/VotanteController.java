@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/votantes")
@@ -43,5 +44,22 @@ public class VotanteController {
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         service.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // NUEVO: Registrar con imagen y UUID generado
+    @PostMapping("/registrar")
+    public ResponseEntity<?> registrarConQRyImagen(@RequestBody VotanteDTO dto) {
+        VotanteDTO registrado = service.registrarConImagen(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "id_votante", registrado.getIdVotante(),
+                "qr_uuid", registrado.getQrUuid(),
+                "mensaje", "Votante registrado correctamente"
+        ));
+    }
+
+    // NUEVO: Buscar por CI
+    @GetMapping("/buscar")
+    public ResponseEntity<VotanteDTO> buscarPorCI(@RequestParam String ci) {
+        return ResponseEntity.ok(service.buscarPorCI(ci));
     }
 }
