@@ -12,33 +12,32 @@ import java.util.List;
 
 public class CsvExporter {
 
-    public static void exportarEstudiantes(List<Estudiante> estudiantes, HttpServletResponse response, String nombreArchivo) throws IOException {
+    public static void exportarEstudiantes(List<Persona> estudiantes, HttpServletResponse response, String nombreArchivo) throws IOException {
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + nombreArchivo + ".csv\"");
         CSVWriter writer = new CSVWriter(new OutputStreamWriter(response.getOutputStream()));
         writer.writeNext(new String[]{"ID", "Nombre", "Apellido", "Carrera"});
-        for (Estudiante e : estudiantes) {
+        for (Persona e : estudiantes) {
             writer.writeNext(new String[]{
-                    String.valueOf(e.getId()),
-                    e.getPersona().getNombre(),
-                    e.getPersona().getApellido(),
-                    e.getCarrera().getNombre()
+                    String.valueOf(e.getCi()),
+                    e.getNombre(),
+                    e.getApellido_paterno(),
             });
         }
         writer.close();
     }
 
-    public static void exportarDocentes(List<Docente> docentes, HttpServletResponse response, String nombreArchivo) throws IOException {
+    public static void exportarDocentes(List<Persona> docentes, HttpServletResponse response, String nombreArchivo) throws IOException {
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + nombreArchivo + ".csv\"");
         CSVWriter writer = new CSVWriter(new OutputStreamWriter(response.getOutputStream()));
         writer.writeNext(new String[]{"ID", "Nombre", "Apellido", "Facultad"});
-        for (Docente d : docentes) {
+        for (Persona d : docentes) {
             writer.writeNext(new String[]{
-                    String.valueOf(d.getId()),
-                    d.getPersona().getNombre(),
-                    d.getPersona().getApellido(),
-                    d.getFacultad().getNombre()
+                    String.valueOf(d.getCi()),
+                    d.getNombre(),
+                    d.getApellido_paterno(),
+
             });
         }
         writer.close();
@@ -51,9 +50,9 @@ public class CsvExporter {
         writer.writeNext(new String[]{"ID", "Nombre", "Apellido", "CI"});
         for (Persona p : personas) {
             writer.writeNext(new String[]{
-                    String.valueOf(p.getId()),
+                    String.valueOf(p.getIdPersona()),
                     p.getNombre(),
-                    p.getApellido(),
+                    p.getApellido_paterno(),
                     p.getCi()
             });
         }

@@ -68,8 +68,7 @@ public void asignarEncargadosARecinto(AsignacionEncargadosDTO dto) {
 
     @Override
     public EncargadoInfoDTO buscarEncargadoPorCi(String ci) {
-        Persona persona = personaRepository.findByCi(ci)
-            .orElseThrow(() -> new RuntimeException("Persona no encontrada con CI: " + ci));
+        Persona persona = personaRepository.findByCi(ci).stream().findFirst().orElseThrow();
 
         Encargado encargado = encargadoRepository.findByPersona_IdPersona(persona.getIdPersona())
             .orElseThrow(() -> new RuntimeException("La persona no es encargada"));

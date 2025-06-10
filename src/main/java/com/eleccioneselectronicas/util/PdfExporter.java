@@ -1,6 +1,5 @@
 package com.eleccioneselectronicas.util;
 import com.eleccioneselectronicas.model.Docente;
-import com.eleccioneselectronicas.model.Estudiante;
 import com.eleccioneselectronicas.model.Persona;
 import com.lowagie.text.*;
 import com.lowagie.text.Font;
@@ -16,7 +15,7 @@ import java.util.List;
 
 public class PdfExporter {
     
-    public static void exportarEstudiantes(List<Estudiante> estudiantes, HttpServletResponse response, String nombreArchivo) throws IOException, DocumentException {
+    public static void exportarEstudiantes(List<Persona> estudiantes, HttpServletResponse response, String nombreArchivo) throws IOException, DocumentException {
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + nombreArchivo + ".pdf\"");
         Document document = new Document(PageSize.A4);
@@ -38,7 +37,7 @@ public class PdfExporter {
         document.close();
     }
 
-    public static void exportarDocentes(List<Docente> docentes, HttpServletResponse response, String nombreArchivo) throws IOException, DocumentException {
+    public static void exportarDocentes(List<Persona> docentes, HttpServletResponse response, String nombreArchivo) throws IOException, DocumentException {
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + nombreArchivo + ".pdf\"");
         Document document = new Document(PageSize.A4);
@@ -102,12 +101,12 @@ public class PdfExporter {
         table.addCell(cell);
     }
 
-    private static void escribirDatosEstudiantes(PdfPTable table, List<Estudiante> estudiantes) {
-        for (Estudiante e : estudiantes) {
-            table.addCell(String.valueOf(e.getId()));
-            table.addCell(e.getPersona().getNombre());
-            table.addCell(e.getPersona().getApellido());
-            table.addCell(e.getCarrera().getNombre());
+    private static void escribirDatosEstudiantes(PdfPTable table, List<Persona> estudiantes) {
+        for (Persona e : estudiantes) {
+            table.addCell(String.valueOf(e.getCi()));
+            table.addCell(e.getNombre());
+            table.addCell(e.getApellido_paterno());
+            table.addCell(e.getApellido_materno());
         }
     }
 
@@ -131,12 +130,12 @@ public class PdfExporter {
         table.addCell(cell);
     }
 
-    private static void escribirDatosDocentes(PdfPTable table, List<Docente> docentes) {
-        for (Docente d : docentes) {
-            table.addCell(String.valueOf(d.getId()));
-            table.addCell(d.getPersona().getNombre());
-            table.addCell(d.getPersona().getApellido());
-            table.addCell(d.getFacultad().getNombre());
+    private static void escribirDatosDocentes(PdfPTable table, List<Persona> docentes) {
+        for (Persona d : docentes) {
+            table.addCell(String.valueOf(d.getCi()));
+            table.addCell(d.getNombre());
+            table.addCell(d.getApellido_paterno());
+            table.addCell(d.getApellido_materno());
         }
     }
 
@@ -162,9 +161,9 @@ public class PdfExporter {
 
     private static void escribirDatosPersonas(PdfPTable table, List<Persona> personas) {
         for (Persona p : personas) {
-            table.addCell(String.valueOf(p.getId()));
+            table.addCell(String.valueOf(p.getCi()));
             table.addCell(p.getNombre());
-            table.addCell(p.getApellido());
+            table.addCell(p.getApellido_paterno());
             table.addCell(p.getCi());
         }
     }

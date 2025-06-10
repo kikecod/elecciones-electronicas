@@ -163,8 +163,7 @@ public class VotanteServiceImpl implements VotanteService {
     }
     @Override
     public VotanteDTO buscarPorCI(String ci) {
-        Persona persona = personaRepo.findByCi(ci)
-                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada"));
+        Persona persona = personaRepo.findByCi(ci).stream().findFirst().orElseThrow();
         Votante votante = repository.findAll().stream()
                 .filter(v -> v.getPersona().getIdPersona().equals(persona.getIdPersona()))
                 .findFirst()

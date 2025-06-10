@@ -28,17 +28,17 @@ public class PersonaServiceImpl implements PersonaService {
             throw new RuntimeException("No existe una persona con ese CI");
         }
         PersonaDTO dto = new PersonaDTO();
-        dto.setIdPersona(persona.getIdPersona());
-        dto.setCi(persona.getCi());
-        dto.setNombre(persona.getNombre());
-        dto.setApellidoPaterno(persona.getApellido_paterno());
-        dto.setApellidoMaterno(persona.getApellido_paterno());
-        dto.setFechaNacimiento(persona.getFechaNacimiento());
-        dto.setEmail(persona.getEmail());
-        dto.setTelefono(persona.getTelefono());
-        dto.setDireccion(persona.getDireccion());
-        dto.setGenero(persona.getGenero());
-        dto.setFechaAlta(persona.getFechaAlta());
+        dto.setIdPersona(persona.get().getIdPersona());
+        dto.setCi(persona.get().getCi());
+        dto.setNombre(persona.get().getNombre());
+        dto.setApellidoPaterno(persona.get().getApellido_paterno());
+        dto.setApellidoMaterno(persona.get().getApellido_paterno());
+        dto.setFechaNacimiento(persona.get().getFechaNacimiento());
+        dto.setEmail(persona.get().getEmail());
+        dto.setTelefono(persona.get().getTelefono());
+        dto.setDireccion(persona.get().getDireccion());
+        dto.setGenero(persona.get().getGenero());
+        dto.setFechaAlta(persona.get().getFechaAlta());
         return dto;
     }
 

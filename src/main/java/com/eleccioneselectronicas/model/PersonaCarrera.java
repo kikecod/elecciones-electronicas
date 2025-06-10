@@ -1,10 +1,19 @@
 package com.eleccioneselectronicas.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 
 @Entity
 @IdClass(PersonaCarreraId.class)
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PersonaCarrera {
 
     @Id
