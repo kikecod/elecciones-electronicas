@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface VotanteRepository extends JpaRepository<Votante, Long> {
     boolean existsByQrUuid(String qrUuid);
-    Optional<Votante> findByPersona_Ci(String ci); 
+    Optional<Votante> findByPersona_Ci(String ci);
+
 }
