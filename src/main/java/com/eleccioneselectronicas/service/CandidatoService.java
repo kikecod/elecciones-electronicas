@@ -11,4 +11,5 @@ public interface CandidatoService {
     CandidatoDTO actualizar(Long id, CandidatoDTO dto);
     void eliminar(Long id);
     List<CandidatoDTO> buscarPorCargoPostulado(String cargoPostulado);
+    CandidatoDTO actualizarPropuesta(Long id, String string);
 }

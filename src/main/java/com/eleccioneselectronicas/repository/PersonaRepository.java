@@ -9,7 +9,11 @@ import java.util.Optional;
 @Repository
 public interface PersonaRepository extends JpaRepository<Persona, Long> {
     List<Persona> findByNombreContainingIgnoreCase(String nombre);
+
+    Persona findByCi(String ci);
+
     Optional<Persona> findByCi(String ci);
+
 }
 
 
