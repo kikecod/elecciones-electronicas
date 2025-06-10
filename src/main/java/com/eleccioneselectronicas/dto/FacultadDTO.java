@@ -1,7 +1,15 @@
 package com.eleccioneselectronicas.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class FacultadDTO {
 
     private Long id;
@@ -10,53 +18,7 @@ public class FacultadDTO {
     private LocalDate fechaCreacion;
     private Long idDecano;
     private Boolean estado;
-
-    // Getters y Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getCodigo() {
-        return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
-
-    public LocalDate getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDate fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public Long getIdDecano() {
-        return idDecano;
-    }
-
-    public void setIdDecano(Long idDecano) {
-        this.idDecano = idDecano;
-    }
-
-    public Boolean getEstado() {
-        return estado;
-    }
-
-    public void setEstado(Boolean estado) {
-        this.estado = estado;
-    }
+    private String nombreDecano;
+    private String ciDecano;
+    private List<CarreraDTO> carreras;
 }

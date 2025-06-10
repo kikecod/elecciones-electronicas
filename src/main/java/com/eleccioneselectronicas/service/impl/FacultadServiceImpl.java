@@ -1,5 +1,6 @@
 package com.eleccioneselectronicas.service.impl;
 
+import com.eleccioneselectronicas.dto.CarreraDTO;
 import com.eleccioneselectronicas.dto.FacultadDTO;
 import com.eleccioneselectronicas.model.Docente;
 import com.eleccioneselectronicas.model.Facultad;
@@ -79,6 +80,27 @@ public class FacultadServiceImpl implements FacultadService {
         dto.setEstado(f.getEstado());
         if (f.getDecano() != null) {
             dto.setIdDecano(f.getDecano().getIdPersona());
+            dto.setCiDecano(f.getDecano().getCi());
+            String nombreCompleto = f.getDecano().getNombre() + " " +
+                    f.getDecano().getApellido_paterno() + " " +
+                    f.getDecano().getApellido_materno();
+            dto.setNombreDecano(nombreCompleto.trim());
+        }
+        // Mapear carreras
+        if (f.getCarreras() != null) {
+            dto.setCarreras(
+                    f.getCarreras().stream()
+                            .map(c -> {
+                                CarreraDTO carreraDTO = new CarreraDTO();
+                                carreraDTO.setId(c.getId());
+                                carreraDTO.setIdFacultad(f.getId());
+                                carreraDTO.setNombre(c.getNombre());
+                                carreraDTO.setCodigo(c.getCodigo());
+                                carreraDTO.setDuracionSemestres(c.getDuracionSemestres());
+                                carreraDTO.setEstado(c.getEstado());
+                                return carreraDTO;
+                            })
+                            .collect(Collectors.toList()));
         }
         return dto;
     }

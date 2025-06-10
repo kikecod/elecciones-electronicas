@@ -32,7 +32,7 @@ public class PersonaServiceImpl implements PersonaService {
         dto.setCi(persona.get().getCi());
         dto.setNombre(persona.get().getNombre());
         dto.setApellidoPaterno(persona.get().getApellido_paterno());
-        dto.setApellidoMaterno(persona.get().getApellido_paterno());
+        dto.setApellidoMaterno(persona.get().getApellido_materno());
         dto.setFechaNacimiento(persona.get().getFechaNacimiento());
         dto.setEmail(persona.get().getEmail());
         dto.setTelefono(persona.get().getTelefono());
