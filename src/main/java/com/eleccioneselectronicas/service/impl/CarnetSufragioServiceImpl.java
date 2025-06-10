@@ -95,6 +95,15 @@ public class CarnetSufragioServiceImpl implements CarnetSufragioService {
                     .setFontSize(18)
                     .setTextAlignment(TextAlignment.CENTER)
                     .setMarginBottom(10));
+            document.add(new Paragraph("Elección: " + dto.getNombreEleccion()))
+                    .setFont(font)
+                    .setFontSize(14)
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(new Paragraph("Fecha de Emisión: " + dto.getFechaEmision())
+                    .setFont(font)
+                    .setFontSize(12)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(20));
 
             // Imagen del logo (a la izquierda)
             ClassPathResource logoResource = new ClassPathResource("static/logo.png");
