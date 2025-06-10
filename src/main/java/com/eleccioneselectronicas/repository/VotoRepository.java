@@ -12,4 +12,14 @@ public interface VotoRepository extends JpaRepository<Voto, Long> {
     boolean existsByVotante_IdVotanteAndEleccion_Id(Long idVotante, Long idEleccion);
     Optional<Voto> findTopByVotante_IdVotanteOrderByEmitidoTsDesc(Long idVotante);
     List<Voto> findByEleccion_Id(Long idEleccion);
+    //int countByRecintoIdAndEleccionId(Long idRecinto, Long idEleccion);
+    int countByRecinto_IdRecintoAndEleccion_Id(Long idRecinto, Long idEleccion);
+
+    // Contar votos por dispositivo y candidato
+    //int countByDispositivoIdAndCandidatoId(Long idDispositivo, Long idCandidato);
+    int countByDispositivo_IdDispositivoAndPartido_IdPartido(Long idDispositivo, Long idPartido);
+
+    // Contar votos por recinto y candidato
+    //int countByRecintoIdAndCandidatoId(Long idRecinto, Long idCandidato);
+    int countByRecinto_IdRecintoAndPartido_IdPartido(Long idRecinto, Long idPartido);
 }

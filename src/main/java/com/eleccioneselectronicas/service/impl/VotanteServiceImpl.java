@@ -34,7 +34,7 @@ public class VotanteServiceImpl implements VotanteService {
     @Autowired
     private RecintoRepository recintoRepo;
 
-    private static final String IMAGES_DIRECTORY = "src/main/resources/votantes/";
+    private static final String IMAGES_DIRECTORY = "/Users/enriquefernandez/Documents/5tosemestre/web backend/proyecto/votantes/";
 
 
     @Override
@@ -121,6 +121,7 @@ public class VotanteServiceImpl implements VotanteService {
     }
 
     // Función para guardar la imagen en una carpeta y devolver la ruta
+    // Función para guardar la imagen en una carpeta y devolver la ruta
     private String saveImage(String base64Image) {
         if (base64Image == null || base64Image.isEmpty()) {
             throw new IllegalArgumentException("Imagen base64 no puede ser nula o vacía");
@@ -133,16 +134,26 @@ public class VotanteServiceImpl implements VotanteService {
         String imageName = UUID.randomUUID().toString() + ".jpg";
         Path imagePath = Paths.get(IMAGES_DIRECTORY, imageName);
 
-        // Crear la carpeta si no existe
+        // Verificar si la carpeta existe antes de intentar crearla
         try {
-            Files.createDirectories(Paths.get(IMAGES_DIRECTORY));
+            File dir = new File(IMAGES_DIRECTORY);
+            if (!dir.exists()) {
+                System.out.println("Creando la carpeta de imágenes: " + IMAGES_DIRECTORY);
+                Files.createDirectories(Paths.get(IMAGES_DIRECTORY));  // Crear la carpeta si no existe
+            } else {
+                System.out.println("La carpeta ya existe: " + IMAGES_DIRECTORY);
+            }
         } catch (IOException e) {
             throw new RuntimeException("No se pudo crear la carpeta de imágenes", e);
         }
 
+        // Verificar la ruta completa para la imagen
+        System.out.println("Guardando la imagen en: " + imagePath.toString());
+
         // Guardar la imagen como un archivo en el servidor
         try (FileOutputStream fos = new FileOutputStream(imagePath.toFile())) {
             fos.write(imageBytes);
+            System.out.println("Imagen guardada correctamente en: " + imagePath.toString());
         } catch (IOException e) {
             throw new RuntimeException("Error al guardar la imagen", e);
         }
