@@ -41,7 +41,7 @@ public class EstudianteController {
         return service.actualizarEstudiante(id, dto);
     }
 
-    @PutMapping("/{id}/baja")
+    @DeleteMapping("/{id}")
     public void eliminarEstudiante(@PathVariable Long id) {
         service.eliminarEstudiante(id);
     }

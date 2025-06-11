@@ -6,9 +6,13 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.eleccioneselectronicas.dto.EstudianteDTO;
+import com.eleccioneselectronicas.model.Carrera;
 import com.eleccioneselectronicas.model.Estudiante;
+import com.eleccioneselectronicas.model.PersonaCarrera;
 import com.eleccioneselectronicas.service.EstudianteService;
+import com.eleccioneselectronicas.repository.CarreraRepository;
 import com.eleccioneselectronicas.repository.EstudianteRepository;
+import com.eleccioneselectronicas.repository.PersonaCarreraRepository;
 
 @Service
 public class EstudianteServiceImpl implements EstudianteService {
@@ -16,8 +20,14 @@ public class EstudianteServiceImpl implements EstudianteService {
     @Autowired
     private EstudianteRepository estudianteRepository;
 
+    @Autowired
+    private CarreraRepository carreraRepository;
+
+    @Autowired
+    private PersonaCarreraRepository personaCarreraRepository;
+
     private EstudianteDTO toDTO(Estudiante e) {
-        return EstudianteDTO.builder()
+        EstudianteDTO dto = EstudianteDTO.builder()
                 .id(e.getIdPersona())
                 .ci(e.getCi())
                 .nombre(e.getNombre())
@@ -34,6 +44,21 @@ public class EstudianteServiceImpl implements EstudianteService {
                 .semestreActual(e.getSemestreActual())
                 .estado(e.getEstado())
                 .build();
+
+        // Obtener la carrera y facultad asociada
+        if (e.getPersonaCarreras() != null && !e.getPersonaCarreras().isEmpty()) {
+            PersonaCarrera pc = e.getPersonaCarreras().stream()
+                    .filter(p -> p.getRol() == PersonaCarrera.Rol.ESTUDIANTE)
+                    .findFirst().orElse(null);
+            if (pc != null && pc.getCarrera() != null) {
+                dto.setIdCarrera(pc.getCarrera().getId());
+                dto.setNombreCarrera(pc.getCarrera().getNombre());
+                if (pc.getCarrera().getFacultad() != null) {
+                    dto.setNombreFacultad(pc.getCarrera().getFacultad().getNombre());
+                }
+            }
+        }
+        return dto;
     }
 
     private Estudiante toEntity(EstudianteDTO dto) {
@@ -62,6 +87,18 @@ public class EstudianteServiceImpl implements EstudianteService {
             throw new RuntimeException("Ya existe un estudiante con ese CI");
         }
         Estudiante e = estudianteRepository.save(toEntity(dto));
+
+        if (dto.getIdCarrera() != null) {
+            Carrera carrera = carreraRepository.findById(dto.getIdCarrera())
+                    .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+            PersonaCarrera personaCarrera = new PersonaCarrera();
+            personaCarrera.setPersona(e);
+            personaCarrera.setCarrera(carrera);
+            personaCarrera.setRol(PersonaCarrera.Rol.ESTUDIANTE);
+            personaCarrera.setFechaAsignacion(java.time.LocalDate.now());
+            personaCarrera.setActivo(true);
+            personaCarreraRepository.save(personaCarrera);
+        }
         return toDTO(e);
     }
 
@@ -84,29 +121,45 @@ public class EstudianteServiceImpl implements EstudianteService {
     public EstudianteDTO actualizarEstudiante(Long id, EstudianteDTO dto) {
         Estudiante e = estudianteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Estudiante no encontrado"));
-        e.setCi(dto.getCi());
-        e.setNombre(dto.getNombre());
-        e.setApellido_paterno(dto.getApellido_paterno());
-        e.setApellido_materno(dto.getApellido_materno());
-        e.setFechaNacimiento(dto.getFechaNacimiento());
-        e.setEmail(dto.getEmail());
-        e.setTelefono(dto.getTelefono());
-        e.setDireccion(dto.getDireccion());
-        e.setGenero(dto.getGenero());
-        e.setFechaAlta(dto.getFechaAlta());
-        e.setMatricula(dto.getMatricula());
-        e.setFechaIngreso(dto.getFechaIngreso());
-        e.setSemestreActual(dto.getSemestreActual());
-        e.setEstado(dto.getEstado());
+        // ...actualiza los campos de e...
         estudianteRepository.save(e);
+
+        // Actualizar la carrera asociada en PersonaCarrera
+        if (dto.getIdCarrera() != null) {
+            Carrera carrera = carreraRepository.findById(dto.getIdCarrera())
+                    .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+
+            // Buscar la relación actual
+            PersonaCarrera personaCarrera = personaCarreraRepository
+                    .findByPersonaAndRol(e, PersonaCarrera.Rol.ESTUDIANTE)
+                    .orElse(null);
+
+            // Si existe y la carrera es diferente, elimina el registro anterior
+            if (personaCarrera != null && !personaCarrera.getCarrera().getId().equals(dto.getIdCarrera())) {
+                personaCarreraRepository.delete(personaCarrera);
+                personaCarrera = null;
+            }
+
+            // Si no existe, crea la nueva relación
+            if (personaCarrera == null) {
+                personaCarrera = new PersonaCarrera();
+                personaCarrera.setPersona(e);
+                personaCarrera.setCarrera(carrera);
+                personaCarrera.setRol(PersonaCarrera.Rol.ESTUDIANTE);
+                personaCarrera.setFechaAsignacion(java.time.LocalDate.now());
+                personaCarrera.setActivo(true);
+                personaCarreraRepository.save(personaCarrera);
+            }
+        }
+
         return toDTO(e);
     }
 
     @Override
     public void eliminarEstudiante(Long id) {
-        Estudiante e = estudianteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Estudiante no encontrado"));
-        e.setEstado("inactivo");
-        estudianteRepository.save(e);
+        if (!estudianteRepository.existsById(id)) {
+            throw new RuntimeException("Estudiante no encontrado");
+        }
+        estudianteRepository.deleteById(id);
     }
 }

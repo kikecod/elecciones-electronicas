@@ -35,4 +35,7 @@ public class Estudiante extends Persona {
     @Column(name = "estado")
     private String estado;
 
+    @OneToMany(mappedBy = "persona", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private java.util.List<PersonaCarrera> personaCarreras;
+
 }

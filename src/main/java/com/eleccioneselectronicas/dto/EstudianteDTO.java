@@ -68,4 +68,8 @@ public class EstudianteDTO implements Serializable{
 
     @NotBlank(message = "El campo activo es obligatorio")
     private String estado;
+
+    private Long idCarrera;
+    private String nombreFacultad;
+    private String nombreCarrera;
 }

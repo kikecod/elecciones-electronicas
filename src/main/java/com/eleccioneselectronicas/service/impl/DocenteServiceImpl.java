@@ -7,17 +7,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eleccioneselectronicas.dto.DocenteDTO;
+import com.eleccioneselectronicas.model.Carrera;
 import com.eleccioneselectronicas.model.Docente;
+import com.eleccioneselectronicas.model.PersonaCarrera;
+import com.eleccioneselectronicas.repository.CarreraRepository;
 import com.eleccioneselectronicas.repository.DocenteRepository;
+import com.eleccioneselectronicas.repository.PersonaCarreraRepository;
 import com.eleccioneselectronicas.service.DocenteService;
 
 @Service
-public class DocenteServiceImpl implements DocenteService{
-     @Autowired
+public class DocenteServiceImpl implements DocenteService {
+    @Autowired
     private DocenteRepository docenteRepository;
 
+    @Autowired
+    private CarreraRepository carreraRepository;
+
+    @Autowired
+    private PersonaCarreraRepository personaCarreraRepository;
+
     private DocenteDTO toDTO(Docente d) {
-        return DocenteDTO.builder()
+        DocenteDTO dto = DocenteDTO.builder()
                 .id(d.getIdPersona())
                 .ci(d.getCi())
                 .nombre(d.getNombre())
@@ -34,6 +44,22 @@ public class DocenteServiceImpl implements DocenteService{
                 .fechaIngreso(d.getFechaIngreso())
                 .activo(d.getActivo())
                 .build();
+
+        if (d.getPersonaCarreras() != null && !d.getPersonaCarreras().isEmpty()) {
+            // Busca la relación con rol DOCENTE
+            PersonaCarrera personaCarrera = d.getPersonaCarreras().stream()
+                    .filter(pc -> pc.getRol() == PersonaCarrera.Rol.DOCENTE)
+                    .findFirst().orElse(null);
+
+            if (personaCarrera != null && personaCarrera.getCarrera() != null) {
+                dto.setIdCarrera(personaCarrera.getCarrera().getId());
+                dto.setNombreCarrera(personaCarrera.getCarrera().getNombre());
+                if (personaCarrera.getCarrera().getFacultad() != null) {
+                    dto.setNombreFacultad(personaCarrera.getCarrera().getFacultad().getNombre());
+                }
+            }
+        }
+        return dto;
     }
 
     private Docente toEntity(DocenteDTO dto) {
@@ -61,7 +87,22 @@ public class DocenteServiceImpl implements DocenteService{
         if (docenteRepository.existsByCi(dto.getCi())) {
             throw new RuntimeException("Ya existe un docente con ese CI");
         }
+        // 1. Guardar el docente
         Docente d = docenteRepository.save(toEntity(dto));
+
+        // 2. Asociar a carrera en PersonaCarrera
+        if (dto.getIdCarrera() != null) {
+            Carrera carrera = carreraRepository.findById(dto.getIdCarrera())
+                    .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+            PersonaCarrera personaCarrera = new PersonaCarrera();
+            personaCarrera.setPersona(d); // Docente hereda de Persona
+            personaCarrera.setCarrera(carrera);
+            personaCarrera.setRol(PersonaCarrera.Rol.DOCENTE);
+            personaCarrera.setFechaAsignacion(java.time.LocalDate.now());
+            personaCarrera.setActivo(true);
+            personaCarreraRepository.save(personaCarrera);
+        }
+
         return toDTO(d);
     }
 
@@ -99,14 +140,43 @@ public class DocenteServiceImpl implements DocenteService{
         d.setFechaIngreso(dto.getFechaIngreso());
         d.setActivo(dto.getActivo());
         docenteRepository.save(d);
+
+        // Actualizar la carrera asociada en PersonaCarrera
+        if (dto.getIdCarrera() != null) {
+            Carrera carrera = carreraRepository.findById(dto.getIdCarrera())
+                    .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+
+            // Buscar la relación actual
+            PersonaCarrera personaCarrera = personaCarreraRepository
+                    .findByPersonaAndRol(d, PersonaCarrera.Rol.DOCENTE)
+                    .orElse(null);
+
+            // Si existe y la carrera es diferente, elimina el registro anterior
+            if (personaCarrera != null && !personaCarrera.getCarrera().getId().equals(dto.getIdCarrera())) {
+                personaCarreraRepository.delete(personaCarrera);
+                personaCarrera = null;
+            }
+
+            // Si no existe, crea la nueva relación
+            if (personaCarrera == null) {
+                personaCarrera = new PersonaCarrera();
+                personaCarrera.setPersona(d);
+                personaCarrera.setCarrera(carrera);
+                personaCarrera.setRol(PersonaCarrera.Rol.DOCENTE);
+                personaCarrera.setFechaAsignacion(java.time.LocalDate.now());
+                personaCarrera.setActivo(true);
+                personaCarreraRepository.save(personaCarrera);
+            }
+        }
+
         return toDTO(d);
     }
 
     @Override
     public void eliminarDocente(Long id) {
-        Docente d = docenteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Docente no encontrado"));
-        d.setActivo("no");
-        docenteRepository.save(d);
+        if (!docenteRepository.existsById(id)) {
+            throw new RuntimeException("Docente no encontrado");
+        }
+        docenteRepository.deleteById(id);
     }
 }

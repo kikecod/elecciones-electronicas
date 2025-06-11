@@ -39,7 +39,7 @@ public class DocenteController {
         return docenteService.actualizarDocente(id, dto);
     }
 
-    @PutMapping("/{id}/baja")
+    @DeleteMapping("/{id}")
     public void eliminarDocente(@PathVariable Long id) {
         docenteService.eliminarDocente(id);
     }
