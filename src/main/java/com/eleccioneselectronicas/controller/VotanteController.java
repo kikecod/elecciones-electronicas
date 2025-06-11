@@ -1,6 +1,7 @@
 package com.eleccioneselectronicas.controller;
 
 import com.eleccioneselectronicas.dto.VotanteDTO;
+import com.eleccioneselectronicas.dto.VotanteRequestDTO;
 import com.eleccioneselectronicas.service.VotanteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class VotanteController {
 
     // NUEVO: Registrar con imagen y UUID generado
     @PostMapping("/registrar")
-    public ResponseEntity<?> registrarConQRyImagen(@RequestBody VotanteDTO dto) {
+    public ResponseEntity<?> registrarConQRyImagen(@RequestBody VotanteRequestDTO dto) {
         VotanteDTO registrado = service.registrarConImagen(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "id_votante", registrado.getIdVotante(),
