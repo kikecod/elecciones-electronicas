@@ -1,6 +1,7 @@
 package com.eleccioneselectronicas.service.impl;
 
 import com.eleccioneselectronicas.dto.CarreraDTO;
+import com.eleccioneselectronicas.dto.EstudianteDTO;
 import com.eleccioneselectronicas.model.Carrera;
 import com.eleccioneselectronicas.model.Facultad;
 import com.eleccioneselectronicas.repository.CarreraRepository;
@@ -81,6 +82,11 @@ public class CarreraServiceImpl implements CarreraService {
         dto.setEstado(carrera.getEstado());
         if (carrera.getFacultad() != null) {
             dto.setIdFacultad(carrera.getFacultad().getId());
+        }
+        if (carrera.getPersonaCarreras() != null) {
+            dto.setNumeroEstudiantes(carrera.getPersonaCarreras().size());
+        } else {
+            dto.setNumeroEstudiantes(0);
         }
         return dto;
     }

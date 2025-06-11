@@ -98,6 +98,7 @@ public class FacultadServiceImpl implements FacultadService {
                                 carreraDTO.setCodigo(c.getCodigo());
                                 carreraDTO.setDuracionSemestres(c.getDuracionSemestres());
                                 carreraDTO.setEstado(c.getEstado());
+                                carreraDTO.setNumeroEstudiantes(c.getPersonaCarreras() != null ? c.getPersonaCarreras().size() : 0);
                                 return carreraDTO;
                             })
                             .collect(Collectors.toList()));
