@@ -34,7 +34,7 @@ public class VotanteServiceImpl implements VotanteService {
     @Autowired
     private RecintoRepository recintoRepo;
 
-    private static final String IMAGES_DIRECTORY = "/Users/enriquefernandez/Documents/5tosemestre/web backend/proyecto/votantes/";
+    private static final String IMAGES_DIRECTORY = "uploads/foto_votante/";
 
 
     @Override
