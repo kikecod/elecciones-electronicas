@@ -1,7 +1,15 @@
 package com.eleccioneselectronicas.model;
 
-import jakarta.persistence.*;
+import java.util.List;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "carrera")
 public class Carrera {
@@ -27,52 +35,6 @@ public class Carrera {
     @Column(nullable = false)
     private Boolean estado;
 
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Facultad getFacultad() {
-        return facultad;
-    }
-
-    public void setFacultad(Facultad facultad) {
-        this.facultad = facultad;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getCodigo() {
-        return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
-
-    public Integer getDuracionSemestres() {
-        return duracionSemestres;
-    }
-
-    public void setDuracionSemestres(Integer duracionSemestres) {
-        this.duracionSemestres = duracionSemestres;
-    }
-
-    public Boolean getEstado() {
-        return estado;
-    }
-
-    public void setEstado(Boolean estado) {
-        this.estado = estado;
-    }
+    @OneToMany(mappedBy = "carrera", fetch = FetchType.LAZY)
+    private List<PersonaCarrera> personaCarreras;
 }
