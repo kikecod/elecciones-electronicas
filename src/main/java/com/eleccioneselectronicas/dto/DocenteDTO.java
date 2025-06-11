@@ -49,7 +49,8 @@ public class DocenteDTO implements Serializable {
     @Size(min = 3, max = 50, message = "La dirección debe tener entre 3 y 35 caracteres")
     private String direccion;
 
-    //@Size(min = 3, max = 10, message = "El género debe tener entre 3 y 10 caracteres")
+    // @Size(min = 3, max = 10, message = "El género debe tener entre 3 y 10
+    // caracteres")
     private String genero;
 
     @NotNull(message = "La fecha de alta es obligatoria")
@@ -69,4 +70,9 @@ public class DocenteDTO implements Serializable {
 
     @NotBlank(message = "El campo activo es obligatorio")
     private String activo;
+
+    private Long idCarrera;
+    private String nombreFacultad;
+    private String nombreCarrera;
+
 }

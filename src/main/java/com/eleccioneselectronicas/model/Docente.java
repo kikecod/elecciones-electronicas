@@ -19,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(name = "docente")
 public class Docente extends Persona {
-    
+
     @Column(name = "categoria_docente", nullable = false, length = 100)
     @Basic(optional = false)
     @Length(min = 3, max = 100)
@@ -37,4 +37,7 @@ public class Docente extends Persona {
 
     @Column(name = "activo")
     private String activo;
+
+    @OneToMany(mappedBy = "persona", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private java.util.List<PersonaCarrera> personaCarreras;
 }
