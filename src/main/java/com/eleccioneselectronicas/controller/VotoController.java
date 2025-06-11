@@ -20,7 +20,7 @@ public class VotoController {
     private VotoService service;
 
     @PostMapping
-    public ResponseEntity<VotoDTO> emitir(@Valid @RequestBody VotoDTO dto) {
+    public ResponseEntity<VotoDTO> emitir(@Valid @RequestBody EmitirVotoDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.emitirVoto(dto));
     }
 
@@ -34,16 +34,16 @@ public class VotoController {
         return ResponseEntity.ok(service.obtenerPorId(id));
     }
 
-    @GetMapping("/recinto/votante/ci/{ci}")
-    public ResponseEntity<UbicacionVotacionDTO> obtenerUbicacion(@PathVariable String ci) {
-        return ResponseEntity.ok(service.obtenerUbicacionPorCI(ci));
-    }
-
-    @PostMapping("/voto/buscar/{ci}/recinto/{idRecinto}")
-    public ResponseEntity<ValidacionUbicacionResponseDTO> validarUbicacion(
-            @PathVariable String ci,
-            @PathVariable Long idRecinto,
-            @RequestBody ValidacionUbicacionRequestDTO dto) {
-        return ResponseEntity.ok(service.validarUbicacion(ci, idRecinto, dto));
-    }
+//    @GetMapping("/recinto/votante/ci/{ci}")
+//    public ResponseEntity<UbicacionVotacionDTO> obtenerUbicacion(@PathVariable String ci) {
+//        return ResponseEntity.ok(service.obtenerUbicacionPorCI(ci));
+//    }
+//
+//    @PostMapping("/voto/buscar/{ci}/recinto/{idRecinto}")
+//    public ResponseEntity<ValidacionUbicacionResponseDTO> validarUbicacion(
+//            @PathVariable String ci,
+//            @PathVariable Long idRecinto,
+//            @RequestBody ValidacionUbicacionRequestDTO dto) {
+//        return ResponseEntity.ok(service.validarUbicacion(ci, idRecinto, dto));
+//    }
 }

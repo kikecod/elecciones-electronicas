@@ -6,6 +6,7 @@ import com.eleccioneselectronicas.service.PartidoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -89,5 +90,14 @@ public class PartidoController {
     @DeleteMapping("/{id}")
     public void eliminarPartido(@PathVariable Long id) {
         partidoService.eliminarPartido(id);
+    }
+
+    @GetMapping("/eleccion/{idEleccion}")
+    public ResponseEntity<List<Partido>> obtenerPartidosPorEleccion(@PathVariable Long idEleccion) {
+        List<Partido> partidos = partidoService.obtenerPartidoporIdEleccion(idEleccion);
+        if (partidos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(partidos);
     }
 }

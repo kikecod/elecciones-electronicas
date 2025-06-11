@@ -1,6 +1,7 @@
 package com.eleccioneselectronicas.service.impl;
 
-import com.eleccioneselectronicas.dto.*;
+import com.eleccioneselectronicas.dto.*; // Import your DTOs
+import com.eleccioneselectronicas.model.AsignacionVotante;
 import com.eleccioneselectronicas.model.Votante;
 import com.eleccioneselectronicas.model.Voto;
 import com.eleccioneselectronicas.repository.*;
@@ -23,10 +24,12 @@ public class VotoServiceImpl implements VotoService {
     @Autowired private EleccionRepository eleccionRepo;
     @Autowired private PartidoRepository partidoRepo;
     @Autowired private RecintoRepository recintoRepo;
-    @Autowired private DispositivoRepository dispositivoRepo;
+    @Autowired private DispositivoRepository dispositivoRepo; // Assuming this is correct
+    @Autowired private AsignacionVotanteRepository asignacionVotanteRepo;
 
+    // Change the input DTO to EmitirVotoRequestDTO
     @Override
-    public VotoDTO emitirVoto(VotoDTO dto) {
+    public VotoDTO emitirVoto(EmitirVotoDTO dto) { // Changed VotoDTO to EmitirVotoRequestDTO for input
         if (votoRepo.existsByVotante_IdVotanteAndEleccion_Id(dto.getIdVotante(), dto.getIdEleccion())) {
             throw new IllegalArgumentException("Este votante ya emitió su voto en esta elección.");
         }
@@ -38,15 +41,24 @@ public class VotoServiceImpl implements VotoService {
             throw new IllegalStateException("Votante no habilitado para votar.");
         }
 
+        AsignacionVotante asignacion = asignacionVotanteRepo.findByVotante_IdVotante(dto.getIdVotante());
+        if (asignacion == null) {
+            throw new EntityNotFoundException("Asignación de votante no encontrada para el votante con ID: " + dto.getIdVotante());
+        }
+
         Voto voto = new Voto();
         voto.setVotante(votante);
-        voto.setEleccion(eleccionRepo.findById(dto.getIdEleccion()).orElseThrow());
-        voto.setPartido(partidoRepo.findById(dto.getIdPartido()).orElseThrow());
-        voto.setRecinto(recintoRepo.findById(dto.getIdRecinto()).orElseThrow());
-        voto.setDispositivo(dispositivoRepo.findById(dto.getIdDispositivo()).orElseThrow());
+        voto.setEleccion(eleccionRepo.findById(dto.getIdEleccion()).orElseThrow(() -> new EntityNotFoundException("Elección no encontrada")));
+        voto.setPartido(partidoRepo.findById(dto.getIdPartido()).orElseThrow(() -> new EntityNotFoundException("Partido no encontrado")));
+        voto.setRecinto(recintoRepo.findById(asignacion.getRecinto().getIdRecinto())
+                .orElseThrow(() -> new EntityNotFoundException("Recinto no encontrado")));
+        voto.setDispositivo(dispositivoRepo.findById(asignacion.getDispositivo().getIdDispositivo())
+                .orElseThrow(() -> new EntityNotFoundException("Dispositivo no encontrado")));
         voto.setEmitidoTs(LocalDateTime.now());
 
-        voto.setHashPrev(dto.getHashPrev());
+        // In a real blockchain-like scenario, hashPrev would link to the previous vote's hash
+        // For simplicity, we'll leave it null for now or set it based on your chain logic
+        voto.setHashPrev(null); // Or fetch the last hash from the blockchain/database if applicable
         voto.setHashActual(generateHash(voto));
         voto.setFolioRecibo(UUID.randomUUID().toString());
         voto.setValido(true);
@@ -96,8 +108,10 @@ public class VotoServiceImpl implements VotoService {
         );
     }
 
+    // This method converts a Voto entity to a VotoDTO (which now contains all fields)
     private VotoDTO toDto(Voto v) {
         VotoDTO dto = new VotoDTO();
+
         dto.setIdVoto(v.getIdVoto());
         dto.setIdVotante(v.getVotante().getIdVotante());
         dto.setIdEleccion(v.getEleccion().getId());
@@ -109,11 +123,12 @@ public class VotoServiceImpl implements VotoService {
         dto.setHashActual(v.getHashActual());
         dto.setFolioRecibo(v.getFolioRecibo());
         dto.setValido(v.getValido());
+
         return dto;
     }
 
     private String generateHash(Voto voto) {
-        String base = voto.getVotante() + "|" + voto.getEleccion() + "|" + voto.getPartido() + "|" + LocalDateTime.now();
+        String base = voto.getVotante().getIdVotante() + "|" + voto.getEleccion().getId() + "|" + voto.getPartido().getIdPartido() + "|" + voto.getEmitidoTs();
         return Base64.getEncoder().encodeToString(base.getBytes());
     }
 }
