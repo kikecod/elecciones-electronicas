@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface AsignacionVotanteRepository extends JpaRepository<AsignacionVotante, Long> {
 
+    AsignacionVotante findByVotante_IdVotante(Long idVotante);
 
 
     List<AsignacionVotante> findByVotante_Eleccion_Id(Long idEleccion);

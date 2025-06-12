@@ -1,12 +1,12 @@
 package com.eleccioneselectronicas.service.impl;
 
 import com.eleccioneselectronicas.dto.VotanteDTO;
+import com.eleccioneselectronicas.dto.VotanteRequestDTO;
+import com.eleccioneselectronicas.model.AsignacionVotante;
 import com.eleccioneselectronicas.model.Persona;
+import com.eleccioneselectronicas.model.Recinto;
 import com.eleccioneselectronicas.model.Votante;
-import com.eleccioneselectronicas.repository.EleccionRepository;
-import com.eleccioneselectronicas.repository.PersonaRepository;
-import com.eleccioneselectronicas.repository.RecintoRepository;
-import com.eleccioneselectronicas.repository.VotanteRepository;
+import com.eleccioneselectronicas.repository.*;
 import com.eleccioneselectronicas.service.VotanteService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,9 @@ public class VotanteServiceImpl implements VotanteService {
     @Autowired
     private RecintoRepository recintoRepo;
 
-    private static final String IMAGES_DIRECTORY = "uploads/foto_votante/";
+    @Autowired private AsignacionVotanteRepository asignacionVotanteRepo;
+
+    private static final String IMAGES_DIRECTORY = "/Users/enriquefernandez/Documents/5tosemestre/web backend/proyecto final/backend/votantes/";
 
 
     @Override
@@ -49,6 +51,11 @@ public class VotanteServiceImpl implements VotanteService {
     }
     @Override
     public VotanteDTO crear(VotanteDTO dto) {
+        AsignacionVotante asignacion = asignacionVotanteRepo.findByVotante_IdVotante(dto.getIdVotante());
+
+        if (asignacion == null) {
+            throw new EntityNotFoundException("Asignación de votante no encontrada para el votante con ID: " + dto.getIdVotante());
+        }
         Votante votante = new Votante();
 
         votante.setPersona(personaRepo.findById(dto.getIdPersona())
@@ -57,7 +64,7 @@ public class VotanteServiceImpl implements VotanteService {
         votante.setEleccion(eleccionRepo.findById(dto.getIdEleccion())
                 .orElseThrow(() -> new EntityNotFoundException("Elección no encontrada")));
 
-        votante.setRecinto(recintoRepo.findById(dto.getIdRecinto())
+        votante.setRecinto(recintoRepo.findById(asignacion.getRecinto().getIdRecinto())
                 .orElseThrow(() -> new EntityNotFoundException("Recinto no encontrado")));
 
         votante.setQrUuid(UUID.randomUUID().toString());
@@ -65,6 +72,7 @@ public class VotanteServiceImpl implements VotanteService {
         // Guardar la imagen en la carpeta y obtener la ruta
         String imagePath = saveImage(dto.getHashRostro());
         votante.setHashRostro(imagePath);  // Almacenar la ruta de la imagen
+
 
         votante.setHashHuella(null);  // Desactivado
         votante.setHashFirma(null);   // Desactivado
@@ -77,7 +85,20 @@ public class VotanteServiceImpl implements VotanteService {
     }
 
     @Override
-    public VotanteDTO registrarConImagen(VotanteDTO dto) {
+    public VotanteDTO registrarConImagen(VotanteRequestDTO dto) {
+
+//        Recinto recinto = new Recinto();
+//        recinto.setIdRecinto(300L);
+//        recinto.setNombre("Recinto por defecto"); // Asignar un nombre por defecto o manejarlo según tu lógica
+//        recinto.setAula("prueba");
+//        recinto.setCapacidad(12);
+//        recinto.setEstado("activo");
+//        recinto.setCampus("Campus por defecto"); // Asignar un campus por defecto o manejarlo según tu lógica
+//        recinto.setEdificio("Edificio por defecto");
+        long id = 40L;
+        Recinto recinto = recintoRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Recinto no encontrado con ID: " + id));
+
         Votante votante = new Votante();
 
         votante.setPersona(personaRepo.findById(dto.getIdPersona())
@@ -86,8 +107,7 @@ public class VotanteServiceImpl implements VotanteService {
         votante.setEleccion(eleccionRepo.findById(dto.getIdEleccion())
                 .orElseThrow(() -> new EntityNotFoundException("Elección no encontrada")));
 
-        votante.setRecinto(recintoRepo.findById(dto.getIdRecinto())
-                .orElseThrow(() -> new EntityNotFoundException("Recinto no encontrado")));
+        votante.setRecinto(recinto); // Asignar un recinto por defecto o manejarlo según tu lógica
 
         votante.setQrUuid(UUID.randomUUID().toString());
 
@@ -104,6 +124,7 @@ public class VotanteServiceImpl implements VotanteService {
         Votante guardado = repository.save(votante);
         return toDto(guardado);
     }
+
     @Override
     public void eliminar(Long id) {
         repository.deleteById(id);

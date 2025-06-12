@@ -61,4 +61,9 @@ public class PartidoServiceImpl implements PartidoService {
     public void eliminarPartido(Long id) {
         partidoRepository.deleteById(id);
     }
+
+    @Override
+    public List<Partido> obtenerPartidoporIdEleccion(Long idEleccion) {
+        return partidoRepository.findByEleccionId(idEleccion);
+    }
 }

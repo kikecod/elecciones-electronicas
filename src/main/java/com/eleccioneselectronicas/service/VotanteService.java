@@ -1,6 +1,7 @@
 package com.eleccioneselectronicas.service;
 
 import com.eleccioneselectronicas.dto.VotanteDTO;
+import com.eleccioneselectronicas.dto.VotanteRequestDTO;
 
 import java.util.List;
 
@@ -11,6 +12,6 @@ public interface VotanteService {
     VotanteDTO actualizar(Long id, VotanteDTO dto);
     void eliminar(Long id);
 
-    VotanteDTO registrarConImagen(VotanteDTO dto);
+    VotanteDTO registrarConImagen(VotanteRequestDTO dto);
     VotanteDTO buscarPorCI(String ci);
 }

@@ -10,4 +10,5 @@ public interface PartidoService {
     Partido actualizarPartido(Long id, PartidoDTO dto);
     void eliminarPartido(Long id);
     Partido actualizarLogo(Long id, String string);
+    List<Partido> obtenerPartidoporIdEleccion(Long idEleccion);
 }

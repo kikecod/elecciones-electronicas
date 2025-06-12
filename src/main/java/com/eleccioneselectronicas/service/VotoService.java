@@ -1,14 +1,11 @@
 package com.eleccioneselectronicas.service;
 
-import com.eleccioneselectronicas.dto.UbicacionVotacionDTO;
-import com.eleccioneselectronicas.dto.ValidacionUbicacionRequestDTO;
-import com.eleccioneselectronicas.dto.ValidacionUbicacionResponseDTO;
-import com.eleccioneselectronicas.dto.VotoDTO;
+import com.eleccioneselectronicas.dto.*;
 
 import java.util.List;
 
 public interface VotoService {
-    VotoDTO emitirVoto(VotoDTO dto);
+    VotoDTO emitirVoto(EmitirVotoDTO dto);
     List<VotoDTO> listarTodos();
     VotoDTO obtenerPorId(Long id);
     UbicacionVotacionDTO obtenerUbicacionPorCI(String ci);
